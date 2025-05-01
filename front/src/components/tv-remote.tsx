@@ -87,7 +87,7 @@ export function TvRemote() {
     <div className="relative w-full max-w-xs mx-auto">
       <div
         className={cn(
-          "relative bg-black border-2 border-white rounded-3xl p-6 shadow-xl",
+          "relative bg-black rounded-3xl",
           "transition-all duration-300",
           power ? "shadow-white/20" : "",
         )}
@@ -256,17 +256,17 @@ export function TvRemote() {
                 variant="outline"
                 className="w-full border-white text-white hover:bg-white/10"
                 disabled={!power}
-                onClick={handleVolumeUp}
+                onClick={handleVolumeDown}
               >
-                <Volume2 className="h-5 w-5" />
+                <Volume1 className="h-5 w-5" />
               </Button>
               <Button
                 variant="outline"
                 className="w-full border-white text-white hover:bg-white/10"
                 disabled={!power}
-                onClick={handleVolumeDown}
+                onClick={handleVolumeUp}
               >
-                <Volume1 className="h-5 w-5" />
+                <Volume2 className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -280,17 +280,17 @@ export function TvRemote() {
                 variant="outline"
                 className="w-full border-white text-white hover:bg-white/10"
                 disabled={!power}
-                onClick={handleChannelUp}
+                onClick={handleChannelDown}
               >
-                <ChevronUp className="h-5 w-5" />
+                <ChevronDown className="h-5 w-5" />
               </Button>
               <Button
                 variant="outline"
                 className="w-full border-white text-white hover:bg-white/10"
                 disabled={!power}
-                onClick={handleChannelDown}
+                onClick={handleChannelUp}
               >
-                <ChevronDown className="h-5 w-5" />
+                <ChevronUp className="h-5 w-5" />
               </Button>
             </div>
           </div>
