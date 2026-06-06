@@ -3,7 +3,7 @@ services:
     build:
       context: ./back
     env_file:
-      - ./back/.env
+      - ./.env
     environment:
       PORT: 4000
     ports:
