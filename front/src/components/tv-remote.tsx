@@ -12,28 +12,59 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { requestGetServer } from "./requests";
+
+type DecoderStatusResponse = {
+  statusCode: number;
+  result?: {
+    data?: {
+      activeStandbyState?: number | string;
+    };
+  };
+};
+
+const readPowerState = (response?: DecoderStatusResponse) => {
+  const activeStandbyState = response?.result?.data?.activeStandbyState;
+  if (activeStandbyState === undefined) return undefined;
+
+  return activeStandbyState.toString() === "0";
+};
 
 export function TvRemote() {
   const [power, setPower] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | undefined>();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["tvState"],
-    queryFn: async () => await requestGetServer("/status"),
+    queryFn: async () => await requestGetServer<DecoderStatusResponse>("/status"),
     refetchOnWindowFocus: true,
+    refetchInterval: 3000,
   });
 
   useEffect(() => {
     if (isLoading || error || !data) return;
-    try {
-      setPower(data.result.data.activeStandbyState == 0 ? true : false);
-    } catch {}
+    const isOn = readPowerState(data);
+    if (isOn !== undefined) {
+      setPower(isOn);
+      if (isOn) {
+        setStatusMessage(undefined);
+      }
+    }
   }, [data, isLoading, error]);
 
   const handlePower = async () => {
-    setPower(!power);
-    await requestGetServer("/power");
+    setStatusMessage(undefined);
+    const response = await requestGetServer<DecoderStatusResponse>("/power");
+    const isOn = readPowerState(response);
+    if (isOn !== undefined) {
+      setPower(isOn);
+      if (!isOn) {
+        setStatusMessage("Decoder accepted the command but stayed in standby.");
+      }
+    }
+    await queryClient.refetchQueries({ queryKey: ["tvState"] });
   };
 
   const handleVolumeUp = async () => {
@@ -110,6 +141,9 @@ export function TvRemote() {
           </Button>
           <h1 className="text-neutral-400 text-xs text-center">Power</h1>
         </div>
+        {statusMessage && (
+          <p className="mb-4 text-xs leading-4 text-red-300">{statusMessage}</p>
+        )}
 
         {/* Navigation Controls - Rotated Circular Pad */}
         <div className="relative h-48 w-48 mx-auto mb-6">
